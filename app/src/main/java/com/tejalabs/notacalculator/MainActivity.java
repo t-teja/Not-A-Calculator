@@ -162,6 +162,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private String generateWrongResult(double correct, double num1, double num2, String op) {
+        // Check if both operands are whole numbers
+        boolean bothWholeNumbers = (num1 == (long) num1) && (num2 == (long) num2);
+
         // Different strategies for generating funny wrong results
         int strategy = random.nextInt(6);
         double wrongResult;
@@ -202,12 +205,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
 
-        // Format the result nicely
-        if (wrongResult == (long) wrongResult) {
+        // Format the result based on input types
+        if (bothWholeNumbers && wrongResult == (long) wrongResult) {
+            // If both inputs were whole numbers and result is whole, show as integer
+            return String.valueOf((long) wrongResult);
+        } else if (wrongResult == (long) wrongResult) {
+            // If result is a whole number, show as integer
             return String.valueOf((long) wrongResult);
         } else {
-            return String.format("%.2f", wrongResult);
+            // Show with minimal decimal places
+            return formatDecimalResult(wrongResult);
         }
+    }
+
+    private String formatDecimalResult(double value) {
+        // Format to remove unnecessary trailing zeros
+        String formatted = String.format("%.6f", value);
+        formatted = formatted.replaceAll("0*$", "").replaceAll("\\.$", "");
+
+        // If it's still too long, limit to 2 decimal places
+        if (formatted.contains(".") && formatted.split("\\.")[1].length() > 2) {
+            formatted = String.format("%.2f", value);
+            formatted = formatted.replaceAll("0*$", "").replaceAll("\\.$", "");
+        }
+
+        return formatted;
     }
 
     private void handleClearInput() {
@@ -259,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (result == (long) result) {
             return String.valueOf((long) result);
         } else {
-            return String.format("%.6f", result).replaceAll("0*$", "").replaceAll("\\.$", "");
+            return formatDecimalResult(result);
         }
     }
 }
